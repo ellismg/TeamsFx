@@ -23,6 +23,7 @@ import {
 import path, { basename } from "path";
 import fs from "fs-extra";
 import jsum from "jsum";
+import * as dotenv from "dotenv";
 import {
   deserializeDict,
   dataNeedEncryption,
@@ -312,7 +313,7 @@ class EnvironmentManager {
       : this.getConfigFolder(projectPath);
   }
 
-  private getEnvConfigsFolder(projectPath: string): string {
+  public getEnvConfigsFolder(projectPath: string): string {
     return path.resolve(this.getConfigFolder(projectPath), InputConfigsFolderName);
   }
 

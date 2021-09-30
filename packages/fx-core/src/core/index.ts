@@ -7,12 +7,10 @@ import {
   ArchiveFolderName,
   ArchiveLogFileName,
   assembleError,
-  AzureSolutionSettings,
   ConfigFolderName,
   Core,
   CoreCallbackEvent,
   CoreCallbackFunc,
-  EnvConfig,
   err,
   Func,
   FunctionRouter,
@@ -35,14 +33,12 @@ import {
   Solution,
   SolutionConfig,
   SolutionContext,
-  SolutionSettings,
   Stage,
   TelemetryReporter,
   Tools,
   v2,
   Void,
 } from "@microsoft/teamsfx-api";
-import { EnvInfoV2, SolutionPlugin } from "@microsoft/teamsfx-api/build/v2";
 import AdmZip from "adm-zip";
 import { AxiosResponse } from "axios";
 import * as fs from "fs-extra";
@@ -68,11 +64,7 @@ import {
   saveFilesRecursively,
 } from "../common/tools";
 import { PluginNames } from "../plugins";
-import { HostTypeOptionAzure } from "../plugins/solution/fx-solution/question";
-import {
-  getAllV2ResourcePluginMap,
-  getAllV2ResourcePlugins,
-} from "../plugins/solution/fx-solution/ResourcePluginContainer";
+import { getAllV2ResourcePlugins } from "../plugins/solution/fx-solution/ResourcePluginContainer";
 import { CallbackRegistry } from "./callback";
 import {
   CopyFileError,
@@ -82,7 +74,6 @@ import {
   LoadSolutionError,
   MigrateNotImplementError,
   NonExistEnvNameError,
-  NotImplementedError,
   ObjectIsUndefinedError,
   ProjectFolderExistError,
   ProjectFolderNotExistError,
@@ -308,7 +299,7 @@ export class FxCore implements Core {
           ...this.tools,
           ...this.tools.tokenProvider,
           answers: inputs,
-          cryptoProvider: new LocalCrypto(projectSettings.projectId)
+          cryptoProvider: new LocalCrypto(projectSettings.projectId),
         };
         ctx.solutionContext = solutionContext;
         const createRes = await solution.create(solutionContext);
@@ -383,7 +374,7 @@ export class FxCore implements Core {
       ...this.tools,
       ...this.tools.tokenProvider,
       answers: inputs,
-      cryptoProvider: new LocalCrypto(projectSettings.projectId)
+      cryptoProvider: new LocalCrypto(projectSettings.projectId),
     };
 
     await this.archive(projectPath);
@@ -822,7 +813,7 @@ export class FxCore implements Core {
 
   async _getQuestionsForUserTask(
     ctx: SolutionContext | v2.Context,
-    solution: Solution | SolutionPlugin,
+    solution: Solution | v2.SolutionPlugin,
     func: FunctionRouter,
     inputs: Inputs,
     envInfo?: v2.EnvInfoV2
@@ -832,7 +823,7 @@ export class FxCore implements Core {
     if (namespace && "" !== namespace && array.length > 0) {
       let res: Result<QTreeNode | undefined, FxError> = ok(undefined);
       if (isV2()) {
-        const solutionV2 = solution as SolutionPlugin;
+        const solutionV2 = solution as v2.SolutionPlugin;
         if (solutionV2.getQuestionsForUserTask) {
           res = await solutionV2.getQuestionsForUserTask(
             ctx as v2.Context,
@@ -891,7 +882,7 @@ export class FxCore implements Core {
 
   async _getQuestions(
     ctx: SolutionContext | v2.Context,
-    solution: Solution | SolutionPlugin,
+    solution: Solution | v2.SolutionPlugin,
     stage: Stage,
     inputs: Inputs,
     envInfo?: v2.EnvInfoV2
@@ -899,7 +890,7 @@ export class FxCore implements Core {
     if (stage !== Stage.create) {
       let res: Result<QTreeNode | undefined, FxError> = ok(undefined);
       if (isV2()) {
-        const solutionV2 = solution as SolutionPlugin;
+        const solutionV2 = solution as v2.SolutionPlugin;
         if (solutionV2.getQuestions) {
           res = await solutionV2.getQuestions(
             ctx as v2.Context,
@@ -930,14 +921,10 @@ export class FxCore implements Core {
   ): Promise<Result<string, FxError>> {
     if (!ctx) return err(new ObjectIsUndefinedError("ctx"));
     if (isV2()) {
-      if (!ctx.contextV2)
-        return err(new ObjectIsUndefinedError("ctx.contextV2"));
+      if (!ctx.contextV2) return err(new ObjectIsUndefinedError("ctx.contextV2"));
       return ctx.contextV2.cryptoProvider.encrypt(plaintext);
     } else {
-      if (!ctx.solutionContext)
-        return err(
-          new ObjectIsUndefinedError("ctx.solutionContext")
-        );
+      if (!ctx.solutionContext) return err(new ObjectIsUndefinedError("ctx.solutionContext"));
       return ctx.solutionContext.cryptoProvider.encrypt(plaintext);
     }
   }
@@ -950,14 +937,10 @@ export class FxCore implements Core {
   ): Promise<Result<string, FxError>> {
     if (!ctx) return err(new ObjectIsUndefinedError("ctx"));
     if (isV2()) {
-      if (!ctx.contextV2)
-        return err(new ObjectIsUndefinedError("ctx.contextV2"));
+      if (!ctx.contextV2) return err(new ObjectIsUndefinedError("ctx.contextV2"));
       return ctx.contextV2.cryptoProvider.decrypt(ciphertext);
     } else {
-      if (!ctx.solutionContext)
-        return err(
-          new ObjectIsUndefinedError("ctx.solutionContext")
-        );
+      if (!ctx.solutionContext) return err(new ObjectIsUndefinedError("ctx.solutionContext"));
       return ctx.solutionContext.cryptoProvider.decrypt(ciphertext);
     }
   }
