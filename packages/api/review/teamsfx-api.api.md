@@ -133,7 +133,7 @@ export interface Context {
     // (undocumented)
     azureAccountProvider?: AzureAccountProvider;
     // (undocumented)
-    cryptoProvider?: CryptoProvider;
+    cryptoProvider: CryptoProvider;
     // (undocumented)
     graphTokenProvider?: GraphTokenProvider;
     // (undocumented)
@@ -157,7 +157,7 @@ export interface Context {
 // @public (undocumented)
 interface Context_2 {
     // (undocumented)
-    cryptoProvider?: CryptoProvider;
+    cryptoProvider: CryptoProvider;
     // (undocumented)
     logProvider: LogProvider;
     // (undocumented)

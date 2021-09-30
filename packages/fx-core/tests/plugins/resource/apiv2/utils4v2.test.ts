@@ -40,6 +40,7 @@ import {
   ResourcePlugins,
   ResourcePluginsV2,
 } from "../../../../src/plugins/solution/fx-solution/ResourcePluginContainer";
+import { LocalCrypto } from "../../../../src/core/crypto";
 
 describe("API V2 adapter", () => {
   beforeEach(() => {});
@@ -51,6 +52,7 @@ describe("API V2 adapter", () => {
       root: "",
       config: new ConfigMap(),
       envInfo: newEnvInfo(),
+      cryptoProvider: new LocalCrypto(""),
     };
     pluginContext.envInfo.profile.set(
       "plugin1",
@@ -85,6 +87,7 @@ describe("API V2 adapter", () => {
         teamsApp: new ConfigMap([["k1", "v1"]]),
         auth: new ConfigMap([["k2", "v2"]]),
       },
+      cryptoProvider: new LocalCrypto(""),
     };
     const localSettings: Json = {};
     setLocalSettingsV2(localSettings, pluginContext);
@@ -106,6 +109,7 @@ describe("API V2 adapter", () => {
       root: "",
       config: new ConfigMap(),
       envInfo: newEnvInfo(),
+      cryptoProvider: new LocalCrypto(""),
     };
     const provisionOutputs: Json = {
       plugin1: { k1: "v1" },

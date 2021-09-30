@@ -96,6 +96,7 @@ import { TeamsAppSolutionV2 } from "../../../src/plugins/solution/fx-solution/v2
 import { EnvInfoV2, ResourceProvisionOutput } from "@microsoft/teamsfx-api/build/v2";
 import frontend from "../../../src/plugins/resource/frontend";
 import { UnknownObject } from "@azure/core-http/types/latest/src/util/utils";
+import { LocalCrypto } from "../../../src/core/crypto";
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -290,6 +291,7 @@ function mockSolutionContext(): SolutionContext {
     projectSettings: undefined,
     appStudioToken: new MockedAppStudioTokenProvider(),
     azureAccountProvider: new MockedAzureTokenProvider(),
+    cryptoProvider: new LocalCrypto(""),
   };
 }
 

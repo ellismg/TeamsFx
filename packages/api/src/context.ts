@@ -44,7 +44,7 @@ export interface Context {
 
   ui?: UserInteraction;
 
-  cryptoProvider?: CryptoProvider;
+  cryptoProvider: CryptoProvider;
 
   permissionRequestProvider?: PermissionRequestProvider;
 }

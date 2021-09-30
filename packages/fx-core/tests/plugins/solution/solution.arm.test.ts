@@ -57,6 +57,7 @@ import "../../../src/plugins/resource/spfx";
 import "../../../src/plugins/resource/aad";
 import { environmentManager } from "../../../src";
 import { assert } from "sinon";
+import { LocalCrypto } from "../../../src/core/crypto";
 let mockedEnvRestore: () => void;
 
 chai.use(chaiAsPromised);
@@ -89,6 +90,7 @@ function mockSolutionContext(): SolutionContext {
     answers: { platform: Platform.VSCode },
     projectSettings: undefined,
     azureAccountProvider: Object as any & AzureAccountProvider,
+    cryptoProvider: new LocalCrypto(""),
   };
 }
 

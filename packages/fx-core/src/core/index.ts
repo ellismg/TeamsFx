@@ -129,10 +129,10 @@ import {
   getSolutionPluginV2ByName,
 } from "./SolutionPluginContainer";
 import { flattenConfigJson, newEnvInfo } from "./tools";
+import { LocalCrypto } from "./crypto";
 
 export interface CoreHookContext extends HookContext {
   projectSettings?: ProjectSettings;
-  projectIdMissing?: boolean;
   solutionContext?: SolutionContext;
   solution?: Solution;
   //for v2 api
@@ -308,6 +308,7 @@ export class FxCore implements Core {
           ...this.tools,
           ...this.tools.tokenProvider,
           answers: inputs,
+          cryptoProvider: new LocalCrypto(projectSettings.projectId)
         };
         ctx.solutionContext = solutionContext;
         const createRes = await solution.create(solutionContext);
@@ -382,6 +383,7 @@ export class FxCore implements Core {
       ...this.tools,
       ...this.tools.tokenProvider,
       answers: inputs,
+      cryptoProvider: new LocalCrypto(projectSettings.projectId)
     };
 
     await this.archive(projectPath);
@@ -928,13 +930,13 @@ export class FxCore implements Core {
   ): Promise<Result<string, FxError>> {
     if (!ctx) return err(new ObjectIsUndefinedError("ctx"));
     if (isV2()) {
-      if (!ctx.contextV2 || !ctx.contextV2.cryptoProvider)
-        return err(new ObjectIsUndefinedError("ctx.contextV2 or ctx.contextV2.cryptoProvider"));
+      if (!ctx.contextV2)
+        return err(new ObjectIsUndefinedError("ctx.contextV2"));
       return ctx.contextV2.cryptoProvider.encrypt(plaintext);
     } else {
-      if (!ctx.solutionContext || !ctx.solutionContext.cryptoProvider)
+      if (!ctx.solutionContext)
         return err(
-          new ObjectIsUndefinedError("ctx.solutionContext or ctx.solutionContext.cryptoProvider")
+          new ObjectIsUndefinedError("ctx.solutionContext")
         );
       return ctx.solutionContext.cryptoProvider.encrypt(plaintext);
     }
@@ -948,13 +950,13 @@ export class FxCore implements Core {
   ): Promise<Result<string, FxError>> {
     if (!ctx) return err(new ObjectIsUndefinedError("ctx"));
     if (isV2()) {
-      if (!ctx.contextV2 || !ctx.contextV2.cryptoProvider)
-        return err(new ObjectIsUndefinedError("ctx.contextV2 or ctx.contextV2.cryptoProvider"));
+      if (!ctx.contextV2)
+        return err(new ObjectIsUndefinedError("ctx.contextV2"));
       return ctx.contextV2.cryptoProvider.decrypt(ciphertext);
     } else {
-      if (!ctx.solutionContext || !ctx.solutionContext.cryptoProvider)
+      if (!ctx.solutionContext)
         return err(
-          new ObjectIsUndefinedError("ctx.solutionContext or ctx.solutionContext.cryptoProvider")
+          new ObjectIsUndefinedError("ctx.solutionContext")
         );
       return ctx.solutionContext.cryptoProvider.decrypt(ciphertext);
     }
@@ -1106,7 +1108,6 @@ export class FxCore implements Core {
       core.tools,
       inputs,
       ctx!.projectSettings,
-      ctx!.projectIdMissing,
       env
     );
 
@@ -1191,7 +1192,7 @@ export async function createBasicFolderStructure(inputs: Inputs): Promise<Result
           description: "",
           author: "",
           scripts: {
-            test: 'echo "Error: no test specified" && exit 1',
+            test: "echo \"Error: no test specified\" && exit 1",
           },
           devDependencies: {
             "@microsoft/teamsfx-cli": "0.*",
@@ -1312,7 +1313,7 @@ export function createV2Context(core: FxCore, projectSettings: ProjectSettings):
     userInteraction: core.tools.ui,
     logProvider: core.tools.logProvider,
     telemetryReporter: core.tools.telemetryReporter!,
-    cryptoProvider: core.tools.cryptoProvider,
+    cryptoProvider: new LocalCrypto(projectSettings.projectId),
     permissionRequestProvider: core.tools.permissionRequest,
     projectSetting: projectSettings,
   };

@@ -100,7 +100,7 @@ async function migrateToArmAndMultiEnv(ctx: CoreHookContext): Promise<void> {
     if (loadRes.isErr()) {
       throw ProjectSettingError();
     }
-    const [projectSettings, _] = loadRes.value;
+    const projectSettings = loadRes.value;
     if (!isSPFxProject(projectSettings)) {
       await migrateArm(ctx);
     }
@@ -427,16 +427,14 @@ async function generateArmTempaltesFiles(ctx: CoreHookContext) {
   if (loadRes.isErr()) {
     throw ProjectSettingError();
   }
-  const [projectSettings, projectIdMissing] = loadRes.value;
+  const projectSettings = loadRes.value;
   minorCtx.projectSettings = projectSettings;
-  minorCtx.projectIdMissing = projectIdMissing;
 
   const targetEnvName = "dev";
   const result = await loadSolutionContext(
     core.tools,
     inputs,
     minorCtx.projectSettings,
-    minorCtx.projectIdMissing,
     targetEnvName,
     inputs.ignoreEnvInfo
   );
